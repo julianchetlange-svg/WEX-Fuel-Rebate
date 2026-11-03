@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>McCoy's WEX Fuel Rebate Analysis — Jan–Sep 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#0d5540;--bg:#062a1f;--bg2:#05231a;--card:#0a3528;--border:#145a43;--yellow:#ffe901;--amber:#f5a800;--green:#3fbf8a;--text:#eef5f1;--muted:#8fb3a4;--dim:#5d8577}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px}
+.mono{font-family:'IBM Plex Mono',monospace}
+/* header */
+.header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 40px;border-bottom:3px solid var(--yellow);background:var(--brand)}
+.brand{display:flex;align-items:center;gap:20px}
+.logo{height:76px;min-width:76px;display:flex;align-items:center;cursor:pointer;position:relative}
+.logo img{height:76px;width:auto;display:block;border-radius:4px}
+
+.tag{font:10px 'IBM Plex Mono';letter-spacing:.2em;text-transform:uppercase;color:var(--yellow);background:rgba(255,233,1,.08);border:1px solid rgba(255,233,1,.35);padding:4px 10px;display:inline-block;margin-bottom:6px}
+h1{font-family:'Bebas Neue';font-size:46px;letter-spacing:.04em;line-height:1;color:#fff}
+h1 span{color:var(--yellow)}
+.hmeta{text-align:right;font:11px/1.8 'IBM Plex Mono';color:#b9d6ca}
+.hmeta strong{color:var(--text);font-size:13px;display:block}
+/* controls */
+.tabs{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 40px}
+.tabbar{display:flex}
+.tab{font:11px 'IBM Plex Mono';letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:15px 22px;cursor:pointer;background:none;border:none;border-bottom:3px solid transparent}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--yellow);border-bottom-color:var(--yellow)}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.seg button{font:10px 'IBM Plex Mono';letter-spacing:.08em;text-transform:uppercase;background:none;border:none;color:var(--muted);padding:7px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--border)}
+.seg button.on{background:var(--green);color:#04261b;font-weight:600}
+.ctl-lbl{font:9px 'IBM Plex Mono';letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-right:8px}
+.view{display:none}.view.on{display:block}
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--border)}
+.kpi{padding:20px 24px;border-right:1px solid var(--border);position:relative}
+.kpi:last-child{border-right:none}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.y::before{background:var(--yellow)}.kpi.g::before{background:var(--green)}.kpi.w::before{background:#fff}.kpi.a::before{background:var(--amber)}
+.kl{font:9px 'IBM Plex Mono';letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.kv{font-family:'Bebas Neue';font-size:34px;line-height:1;color:#fff}
+.ks{font:10px 'IBM Plex Mono';color:var(--muted);margin-top:5px}
+.sec{font:10px 'IBM Plex Mono';letter-spacing:.22em;text-transform:uppercase;color:var(--yellow);background:rgba(255,233,1,.04);padding:8px 40px;border-bottom:1px solid var(--border);border-top:1px solid var(--border)}
+.pad{padding:26px 40px}
+.grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:0}
+.grid2>div{padding:26px 40px}
+.grid2>div:first-child{border-right:1px solid var(--border)}
+.pt{font:10px 'IBM Plex Mono';letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.pt::after{content:'';flex:1;height:1px;background:var(--border)}
+/* tables */
+table{width:100%;border-collapse:collapse}
+th{font:9px 'IBM Plex Mono';letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:right;padding:0 0 10px 10px;border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+th.sort{cursor:pointer;user-select:none}th.sort:hover{color:var(--text)}
+th.sorted{color:var(--yellow)}
+td{font:12px 'IBM Plex Mono';padding:9px 0 9px 10px;text-align:right;border-bottom:1px solid rgba(20,90,67,.6);white-space:nowrap}
+tbody tr:hover td{background:rgba(255,233,1,.035)}
+tfoot td{font-weight:600;border-top:2px solid var(--yellow);border-bottom:none;padding-top:11px;color:#fff}
+.cy{color:var(--yellow)}.cg{color:var(--green)}.ca{color:var(--amber)}.cm{color:var(--muted)}.cw{color:#fff;font-weight:600}
+.badge{display:inline-block;font:10px 'IBM Plex Mono';padding:2px 7px;border-radius:2px;background:rgba(63,191,138,.15);border:1px solid rgba(63,191,138,.45);color:var(--green)}
+.badge.t2{background:rgba(255,233,1,.12);border-color:rgba(255,233,1,.45);color:var(--yellow)}
+.badge.t1{background:rgba(245,168,0,.12);border-color:rgba(245,168,0,.45);color:var(--amber)}
+.badge.t0{background:rgba(143,179,164,.1);border-color:var(--dim);color:var(--muted)}
+/* chart */
+.chart{position:relative;height:260px;display:flex;align-items:flex-end;gap:14px;padding-left:46px;border-bottom:1px solid var(--border)}
+.yax{position:absolute;left:0;top:0;bottom:0;width:100%;pointer-events:none}
+.yl{position:absolute;left:0;font:9px 'IBM Plex Mono';color:var(--dim);transform:translateY(50%)}
+.yg{position:absolute;left:46px;right:0;border-top:1px dashed rgba(20,90,67,.9)}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;cursor:pointer;position:relative;z-index:1}
+.col .seg1{background:var(--yellow)}.col .seg2{background:var(--green);border-radius:2px 2px 0 0}
+.col:hover{opacity:.82}
+.xl{display:flex;gap:14px;padding-left:46px;margin-top:8px}
+.xl div{flex:1;text-align:center;font:10px 'IBM Plex Mono';color:var(--muted)}
+.legend{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:6px;font:10px 'IBM Plex Mono';color:var(--muted)}
+.ld{width:10px;height:10px;border-radius:2px}
+/* tier ladder */
+.ladder{display:flex;flex-direction:column;gap:10px}
+.rung{display:grid;grid-template-columns:120px 1fr 70px;align-items:center;gap:12px;font:11px 'IBM Plex Mono'}
+.track{height:22px;background:var(--card);border:1px solid var(--border);position:relative;border-radius:2px;overflow:hidden}
+.fill{position:absolute;top:0;bottom:0;left:0;background:linear-gradient(90deg,rgba(63,191,138,.35),var(--green))}
+.mark{position:absolute;top:-2px;bottom:-2px;width:2px}
+.mk-lbl{position:absolute;top:2px;font:9px 'IBM Plex Mono';color:#04261b;padding-left:6px;font-weight:600}
+.note{font:11px/1.7 'IBM Plex Sans';color:var(--muted);background:var(--card);border:1px solid var(--border);border-left:3px solid var(--yellow);padding:12px 16px;margin-top:18px}
+.note b{color:var(--text);font-weight:500}
+.terms{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.term{background:var(--card);border:1px solid var(--border);padding:14px 16px}
+.term h4{font:10px 'IBM Plex Mono';letter-spacing:.15em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px;font-weight:600}
+.term table td{font-size:11px;padding:5px 0 5px 8px}
+/* location tab */
+.toolbar{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:16px 40px;border-bottom:1px solid var(--border);background:rgba(10,53,40,.6)}
+input[type=search]{background:var(--card);border:1px solid var(--border);color:var(--text);font:12px 'IBM Plex Mono';padding:8px 12px;width:200px;border-radius:3px}
+input[type=search]:focus{outline:none;border-color:var(--yellow)}
+select{background:var(--card);border:1px solid var(--border);color:var(--text);font:11px 'IBM Plex Mono';padding:7px 10px;border-radius:3px}
+.btn{font:10px 'IBM Plex Mono';letter-spacing:.1em;text-transform:uppercase;background:var(--yellow);color:#062a1f;border:none;padding:8px 14px;border-radius:3px;cursor:pointer;font-weight:600}
+.btn.ghost{background:none;color:var(--muted);border:1px solid var(--border)}
+.tablewrap{overflow-x:auto;padding:20px 40px 30px}
+.matrix td.cell{position:relative}
+.matrix td.cell span{position:relative;z-index:1}
+.heat{position:absolute;inset:2px 0 2px 6px;background:var(--green);border-radius:2px;z-index:0}
+.loc{color:#fff;font-weight:600;cursor:pointer;border-bottom:1px dotted var(--dim)}
+.loc:hover{color:var(--yellow)}
+.split{display:flex;flex-direction:column;align-items:flex-end;line-height:1.35}
+.split small{font-size:10px}
+/* drawer */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:560px;max-width:100%;background:var(--bg2);border-left:3px solid var(--yellow);transform:translateX(105%);transition:transform .25s ease;z-index:50;overflow-y:auto;padding:28px 32px;box-shadow:-20px 0 40px rgba(0,0,0,.5)}
+.drawer.on{transform:none}
+.drawer h2{font-family:'Bebas Neue';font-size:38px;letter-spacing:.04em;color:#fff;line-height:1}
+.drawer h2 span{color:var(--yellow)}
+.x{position:absolute;top:18px;right:22px;background:none;border:1px solid var(--border);color:var(--muted);font:14px 'IBM Plex Mono';width:32px;height:32px;cursor:pointer;border-radius:3px}
+.dk{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 22px}
+.dk>div{background:var(--card);border:1px solid var(--border);padding:12px}
+.dk .kv{font-size:26px}
+.tt{position:fixed;pointer-events:none;background:#04261b;border:1px solid var(--yellow);padding:9px 12px;font:11px/1.7 'IBM Plex Mono';z-index:100;display:none;white-space:nowrap}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#04261b;font:12px 'IBM Plex Mono';padding:10px 18px;border-radius:3px;display:none;z-index:120;font-weight:600}
+.footer{border-top:1px solid var(--border);padding:14px 40px;font:10px 'IBM Plex Mono';color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+@media(max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.grid2>div:first-child{border-right:none}.header{flex-direction:column;align-items:flex-start}.hmeta{text-align:left}.terms{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="tt" id="tt"></div>
+<div class="toast" id="toast"></div>
+
+<header class="header">
+  <div class="brand">
+    <div class="logo"><img alt="McCoy's Building Supply" src="__LOGO__"></div>
+    <div>
+      <div class="tag">⛽ McCoy's Building Supply · WEX Rebate Program</div>
+      <h1>FUEL REBATE <span>ANALYSIS</span></h1>
+    </div>
+  </div>
+  <div class="hmeta">
+    <strong>Jan 1 – Sep 30, 2026</strong>
+    __TXNS__ card transactions · 107 locations<br>
+    Source: WEX transactions export · Nov 3, 2026
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tabbar">
+    <button class="tab on" data-v="summary">Monthly Rebate Summary</button>
+    <button class="tab" data-v="locations">Rebate by Location</button>
+  </div>
+  <div style="display:flex;align-items:center;padding:8px 0">
+    <span class="ctl-lbl">Rebate $ basis</span>
+    <div class="seg" id="basisSeg">
+      <button class="on" data-b="all" title="All Monthly Retail Transactions (fuel, DEF, merchandise, service) — per contract wording">All transactions</button>
+      <button data-b="fuel" title="Fuel gallons only — excludes DEF, merchandise and service">Fuel only</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ SUMMARY ═════════ -->
+<section class="view on" id="v-summary">
+  <div class="kpis" id="kpis"></div>
+
+  <div class="sec">Early Pay vs. Consumption Rebate — by Month</div>
+  <div class="grid2">
+    <div>
+      <div class="pt">Monthly rebate earned</div>
+      <div class="chart" id="chart"></div>
+      <div class="xl" id="xl"></div>
+      <div class="legend">
+        <div class="li"><div class="ld" style="background:var(--yellow)"></div>Early Pay (Tri-Monthly) · 0.20%</div>
+        <div class="li"><div class="ld" style="background:var(--green)"></div>Consumption (Volume) · tier rate</div>
+      </div>
+    </div>
+    <div>
+      <div class="pt">Monthly gallons vs. volume tiers</div>
+      <div class="ladder" id="ladder"></div>
+      <div class="note" id="cushionNote"></div>
+    </div>
+  </div>
+
+  <div class="sec">Monthly Detail</div>
+  <div class="pad">
+    <table id="sumTable">
+      <thead><tr>
+        <th>Month</th><th>Gallons</th><th>Volume Tier</th><th>Eligible Spend</th>
+        <th style="color:var(--yellow)">Early Pay 0.20%</th><th style="color:var(--green)">Consumption Rate</th><th style="color:var(--green)">Consumption $</th><th>Total Rebate</th><th>Eff. ¢/gal</th>
+      </tr></thead>
+      <tbody></tbody><tfoot></tfoot>
+    </table>
+
+    <div class="terms">
+      <div class="term">
+        <h4>Volume Rebate Table (contract)</h4>
+        <table><tbody>
+          <tr><td class="cm">Under 70,000 gal</td><td>—</td><td class="cm">No volume rebate</td></tr>
+          <tr><td>70,000 – 89,999</td><td>90 bp</td><td>0.90%</td></tr>
+          <tr><td>90,000 – 109,999</td><td>105 bp</td><td>1.05%</td></tr>
+          <tr><td>110,000 +</td><td>110 bp</td><td>1.10%</td></tr>
+        </tbody></table>
+      </div>
+      <div class="term">
+        <h4>Payment Timing Rebate (contract)</h4>
+        <table><tbody>
+          <tr><td>Tri-monthly billing &amp; payment</td><td>20 bp</td><td>0.20%</td></tr>
+          <tr><td class="cm" colspan="3" style="white-space:normal;text-align:left;padding-left:0">Paid in full tri-monthly (10th, 20th, 1st business day) via Direct Debit. Applied to all Monthly Retail Transactions.</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="note">
+      <b>How this is calculated.</b> Consumption tier is set by <b>total program gallons for the month</b> (all locations combined, all gallon-measured products including DEF). The tier rate and the 0.20% early-pay rate are each applied to that month's eligible spend (Net Cost). Each location's share is its own spend × the program-wide rate for that month.
+      Assumes all contract conditions were met each month (central billing, paid in full within 26 days). The first tier is shown as 90 bp — the contract image reads "(0.90%)"; it doesn't affect results because every month landed in the top tier.
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ LOCATIONS ═════════ -->
+<section class="view" id="v-locations">
+  <div class="toolbar">
+    <div><span class="ctl-lbl">View</span>
+      <div class="seg" id="modeSeg">
+        <button class="on" data-m="matrix">Location × Month</button>
+        <button data-m="month">Single Month Detail</button>
+      </div>
+    </div>
+    <div id="metricWrap"><span class="ctl-lbl">Show</span>
+      <div class="seg" id="metricSeg">
+        <button class="on" data-k="tot">Total</button>
+        <button data-k="ep">Early Pay</button>
+        <button data-k="co">Consumption</button>
+        <button data-k="both">Split</button>
+      </div>
+    </div>
+    <div id="monthWrap" style="display:none"><span class="ctl-lbl">Month</span><select id="monthSel"></select></div>
+    <input type="search" id="q" placeholder="Search location #…">
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn ghost" id="heatBtn">Heatmap: on</button>
+      <button class="btn" id="copyBtn">Copy table (CSV)</button>
+    </div>
+  </div>
+  <div class="tablewrap"><table id="locTable" class="matrix"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+</section>
+
+<aside class="drawer" id="drawer">
+  <button class="x" id="dx">✕</button>
+  <div class="tag">Location detail</div>
+  <h2 id="dTitle"></h2>
+  <div class="dk" id="dk"></div>
+  <table id="dTable"><thead><tr><th>Month</th><th>Gallons</th><th>Spend</th><th>Tier</th><th class="cy">Early Pay</th><th class="cg">Consumption</th><th>Total</th></tr></thead><tbody></tbody><tfoot></tfoot></table>
+</aside>
+
+<footer class="footer">
+  <div>McCOY'S BUILDING SUPPLY · WEX FLEET BUSINESS CHARGE CARD · REBATE ANALYSIS · JAN–SEP 2026</div>
+  <div>Early pay 0.20% + consumption tier rate · tier set on program-wide monthly gallons</div>
+</footer>
+
+<script>
+const RAW = __DATA__;
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+const MFULL=['January','February','March','April','May','June','July','August','September'];
+const EP=0.002;
+const TIERS=[{min:110000,rate:0.011,name:'110,000+',cls:''},{min:90000,rate:0.0105,name:'90,000–109,999',cls:'t2'},{min:70000,rate:0.009,name:'70,000–89,999',cls:'t1'},{min:0,rate:0,name:'Under 70,000',cls:'t0'}];
+const tierFor=g=>TIERS.find(t=>g>=t.min);
+let basis='all', mode='matrix', metric='tot', heat=true, sortKey='total', sortDir=-1, selMonth=9;
+
+const $=s=>document.querySelector(s);
+const f0=n=>Math.round(n).toLocaleString('en-US');
+const d0=n=>'$'+f0(n);
+const d2=n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=r=>(r*100).toFixed(2)+'%';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const locs=Object.keys(RAW).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+const spendOf=r=>r?(basis==='all'?r[1]:r[2]):0;
+
+// program-wide monthly totals (tier is based on total gallons, independent of $ basis)
+function monthly(){
+  return MONTHS.map((m,i)=>{
+    const mi=i+1; let g=0,s=0,t=0,active=0;
+    locs.forEach(l=>{const r=RAW[l][mi]; if(r){g+=r[0];s+=spendOf(r);t+=r[3];active++;}});
+    const tier=tierFor(g);
+    return {m,mi,g,s,t,active,tier,ep:s*EP,co:s*tier.rate};
+  });
+}
+const tierRate=()=>Object.fromEntries(monthly().map(x=>[x.mi,x.tier]));
+
+// ── SUMMARY ──
+function renderSummary(){
+  const M=monthly();
+  const T=M.reduce((a,x)=>({g:a.g+x.g,s:a.s+x.s,ep:a.ep+x.ep,co:a.co+x.co,t:a.t+x.t}),{g:0,s:0,ep:0,co:0,t:0});
+  $('#kpis').innerHTML=`
+    <div class="kpi w"><div class="kl">Total Rebate YTD</div><div class="kv">${d0(T.ep+T.co)}</div><div class="ks">${pct((T.ep+T.co)/T.s)} of eligible spend</div></div>
+    <div class="kpi y"><div class="kl">Early Pay Rebate</div><div class="kv" style="color:var(--yellow)">${d0(T.ep)}</div><div class="ks">0.20% tri-monthly · Jan–Sep</div></div>
+    <div class="kpi g"><div class="kl">Consumption Rebate</div><div class="kv" style="color:var(--green)">${d0(T.co)}</div><div class="ks">volume tier · Jan–Sep</div></div>
+    <div class="kpi a"><div class="kl">Eligible Spend</div><div class="kv">${d0(T.s)}</div><div class="ks">${basis==='all'?'all retail transactions':'fuel only (ex DEF/merch)'}</div></div>
+    <div class="kpi g"><div class="kl">Total Gallons</div><div class="kv">${f0(T.g)}</div><div class="ks">avg ${f0(T.g/9)} / month · 9 of 9 in top tier</div></div>`;
+  // chart
+  const max=Math.max(...M.map(x=>x.ep+x.co)); const top=Math.ceil(max/2000)*2000;
+  let ax='<div class="yax">'; for(let v=0;v<=top;v+=top/4){const p=v/top*100; ax+=`<div class="yg" style="bottom:${p}%"></div><div class="yl" style="bottom:${p}%">$${(v/1000).toFixed(v%1000?1:0)}k</div>`;} ax+='</div>';
+  $('#chart').innerHTML=ax+M.map(x=>`<div class="col" data-tip="<b style='color:#fff'>${MFULL[x.mi-1]} 2026</b><br><span style='color:#ffe901'>Early pay: ${d2(x.ep)}</span><br><span style='color:#3fbf8a'>Consumption (${pct(x.tier.rate)}): ${d2(x.co)}</span><br>Total: ${d2(x.ep+x.co)}<br><span style='color:#8fb3a4'>${f0(x.g)} gal · ${d0(x.s)} spend</span>">
+      <div class="seg2" style="height:${x.co/top*100}%"></div><div class="seg1" style="height:${x.ep/top*100}%"></div></div>`).join('');
+  $('#xl').innerHTML=M.map(x=>`<div>${x.m}</div>`).join('');
+  // ladder
+  const gmax=140000;
+  $('#ladder').innerHTML=M.map(x=>`<div class="rung"><div><span class="cw">${x.m}</span> <span class="cm">${f0(x.g)}</span></div>
+     <div class="track"><div class="fill" style="width:${x.g/gmax*100}%"></div>
+       ${[70000,90000,110000].map(t=>`<div class="mark" style="left:${t/gmax*100}%;background:${t===110000?'var(--yellow)':'var(--dim)'}"></div>`).join('')}
+     </div><div><span class="badge ${x.tier.cls}">${pct(x.tier.rate)}</span></div></div>`).join('')+
+     `<div class="rung"><div></div><div style="position:relative;height:14px;font:9px 'IBM Plex Mono';color:var(--dim)">${[70000,90000,110000].map(t=>`<span style="position:absolute;left:${t/gmax*100}%;transform:translateX(-50%)">${t/1000}k</span>`).join('')}</div><div></div></div>`;
+  const low=M.reduce((a,x)=>x.g<a.g?x:a);
+  $('#cushionNote').innerHTML=`<b>All 9 months hit the top tier (1.10%).</b> Tightest month was <b>${MFULL[low.mi-1]}</b> at ${f0(low.g)} gal — only <b>${f0(low.g-110000)} gal</b> (${((low.g-110000)/low.g*100).toFixed(1)}%) above the 110,000 threshold. Dropping one tier that month would have cost ${d0(low.s*0.0005)}.`;
+  // table
+  $('#sumTable tbody').innerHTML=M.map(x=>`<tr><td class="cw">${MFULL[x.mi-1]}</td><td>${f0(x.g)}</td><td><span class="badge ${x.tier.cls}">${x.tier.name}</span></td><td>${d2(x.s)}</td>
+    <td class="cy">${d2(x.ep)}</td><td class="cg">${pct(x.tier.rate)}</td><td class="cg">${d2(x.co)}</td><td class="cw">${d2(x.ep+x.co)}</td><td class="cm">${((x.ep+x.co)/x.g*100).toFixed(2)}¢</td></tr>`).join('');
+  $('#sumTable tfoot').innerHTML=`<tr><td>Jan–Sep Total</td><td>${f0(T.g)}</td><td></td><td>${d2(T.s)}</td><td class="cy">${d2(T.ep)}</td><td class="cg">${pct(T.co/T.s)}</td><td class="cg">${d2(T.co)}</td><td>${d2(T.ep+T.co)}</td><td class="cm">${((T.ep+T.co)/T.g*100).toFixed(2)}¢</td></tr>`;
+  bindTips('#chart .col');
+}
+
+// ── LOCATIONS ──
+function locRows(){
+  const tr=tierRate(); const q=$('#q').value.trim().toLowerCase();
+  return locs.filter(l=>!q||l.toLowerCase().includes(q)).map(l=>{
+    const months=MONTHS.map((m,i)=>{const mi=i+1,r=RAW[l][mi],s=spendOf(r);return {mi,g:r?r[0]:0,s,ep:s*EP,co:s*tr[mi].rate,tier:tr[mi],has:!!r};});
+    const ep=months.reduce((a,x)=>a+x.ep,0),co=months.reduce((a,x)=>a+x.co,0),s=months.reduce((a,x)=>a+x.s,0),g=months.reduce((a,x)=>a+x.g,0);
+    return {l,months,ep,co,s,g,total:ep+co};
+  });
+}
+const val=(x,k)=>k==='ep'?x.ep:k==='co'?x.co:x.ep+x.co;
+function sortRows(rows){
+  const k=sortKey;
+  rows.sort((a,b)=>{
+    let va,vb;
+    if(k==='loc'){return sortDir*a.l.localeCompare(b.l,undefined,{numeric:true});}
+    if(k.startsWith('m')){const mi=+k.slice(1);va=val(a.months[mi-1],metric==='both'?'tot':metric);vb=val(b.months[mi-1],metric==='both'?'tot':metric);}
+    else{va=a[k];vb=b[k];}
+    return sortDir*(va-vb);
+  });
+  return rows;
+}
+function th(label,key,extra=''){return `<th class="sort ${sortKey===key?'sorted':''}" data-s="${key}" ${extra}>${label}${sortKey===key?(sortDir<0?' ▼':' ▲'):''}</th>`;}
+function cellHTML(x,maxv){
+  if(!x.has) return `<td class="cm">—</td>`;
+  if(metric==='both') return `<td><div class="split"><span class="cy">${d0(x.ep)}</span><small class="cg">${d0(x.co)}</small></div></td>`;
+  const v=val(x,metric); const color=metric==='ep'?'var(--yellow)':'var(--green)';
+  return `<td class="cell">${heat?`<div class="heat" style="opacity:${(0.06+0.5*v/maxv).toFixed(3)};background:${color}"></div>`:''}<span>${d0(v)}</span></td>`;
+}
+function renderLocations(){
+  const rows=sortRows(locRows()); const tb=$('#locTable');
+  if(mode==='matrix'){
+    const k=metric==='both'?'tot':metric;
+    const maxv=Math.max(...rows.flatMap(r=>r.months.map(x=>val(x,k))),1);
+    const totKey=metric==='ep'?'ep':metric==='co'?'co':'total';
+    tb.querySelector('thead').innerHTML=`<tr>${th('Location','loc')}${MONTHS.map((m,i)=>th(m,'m'+(i+1))).join('')}${th('Gallons','g')}${th('Spend','s')}${metric==='both'?th('Early Pay','ep','style="color:var(--yellow)"')+th('Consumption','co','style="color:var(--green)"'):''}${th('YTD '+(metric==='ep'?'Early Pay':metric==='co'?'Consumption':'Total'),totKey,'style="color:#fff"')}</tr>`;
+    tb.querySelector('tbody').innerHTML=rows.map(r=>`<tr><td><span class="loc" data-l="${esc(r.l)}">${esc(r.l)}</span></td>${r.months.map(x=>cellHTML(x,maxv)).join('')}<td class="cm">${f0(r.g)}</td><td class="cm">${d0(r.s)}</td>${metric==='both'?`<td class="cy">${d2(r.ep)}</td><td class="cg">${d2(r.co)}</td>`:''}<td class="cw">${d2(r[totKey])}</td></tr>`).join('');
+    const sum=(f)=>rows.reduce((a,r)=>a+f(r),0);
+    tb.querySelector('tfoot').innerHTML=`<tr><td>${rows.length} locations</td>${MONTHS.map((m,i)=>metric==='both'?`<td><div class="split"><span class="cy">${d0(sum(r=>r.months[i].ep))}</span><small class="cg">${d0(sum(r=>r.months[i].co))}</small></div></td>`:`<td>${d0(sum(r=>val(r.months[i],k)))}</td>`).join('')}<td>${f0(sum(r=>r.g))}</td><td>${d0(sum(r=>r.s))}</td>${metric==='both'?`<td class="cy">${d2(sum(r=>r.ep))}</td><td class="cg">${d2(sum(r=>r.co))}</td>`:''}<td>${d2(sum(r=>r[totKey]))}</td></tr>`;
+  } else {
+    const i=selMonth-1, tier=tierRate()[selMonth];
+    const mrows=rows.map(r=>({l:r.l,...r.months[i]})).filter(x=>x.has);
+    if(sortKey.startsWith('m')||['total','ep','co','s','g','loc'].indexOf(sortKey)<0){}
+    const sk=sortKey==='loc'?null:(['g','s','ep','co'].includes(sortKey)?sortKey:'tot');
+    mrows.sort((a,b)=>sk?sortDir*((sk==='tot'?a.ep+a.co:a[sk])-(sk==='tot'?b.ep+b.co:b[sk])):sortDir*a.l.localeCompare(b.l,undefined,{numeric:true}));
+    const T=mrows.reduce((a,x)=>({g:a.g+x.g,s:a.s+x.s,ep:a.ep+x.ep,co:a.co+x.co}),{g:0,s:0,ep:0,co:0});
+    tb.querySelector('thead').innerHTML=`<tr>${th('Location','loc')}${th('Gallons','g')}<th>% of Program Gal</th>${th('Eligible Spend','s')}<th>Volume Tier</th>${th('Early Pay 0.20%','ep','style="color:var(--yellow)"')}${th('Consumption '+pct(tier.rate),'co','style="color:var(--green)"')}${th('Total Rebate','total','style="color:#fff"')}</tr>`;
+    tb.querySelector('tbody').innerHTML=mrows.map(x=>`<tr><td><span class="loc" data-l="${esc(x.l)}">${esc(x.l)}</span></td><td>${f0(x.g)}</td><td class="cm">${(x.g/T.g*100).toFixed(2)}%</td><td>${d2(x.s)}</td><td><span class="badge ${tier.cls}">${tier.name}</span></td><td class="cy">${d2(x.ep)}</td><td class="cg">${d2(x.co)}</td><td class="cw">${d2(x.ep+x.co)}</td></tr>`).join('');
+    tb.querySelector('tfoot').innerHTML=`<tr><td>${mrows.length} active locations</td><td>${f0(T.g)}</td><td>100%</td><td>${d2(T.s)}</td><td></td><td class="cy">${d2(T.ep)}</td><td class="cg">${d2(T.co)}</td><td>${d2(T.ep+T.co)}</td></tr>`;
+  }
+  tb.querySelectorAll('th.sort').forEach(h=>h.onclick=()=>{const s=h.dataset.s; if(s===sortKey)sortDir*=-1; else{sortKey=s;sortDir=s==='loc'?1:-1;} renderLocations();});
+  tb.querySelectorAll('.loc').forEach(e=>e.onclick=()=>openDrawer(e.dataset.l));
+}
+function openDrawer(l){
+  const r=locRows().find(x=>x.l===l)||(()=>{const q=$('#q').value;$('#q').value='';const v=locRows().find(x=>x.l===l);$('#q').value=q;return v;})();
+  $('#dTitle').innerHTML=`LOCATION <span>${esc(l)}</span>`;
+  $('#dk').innerHTML=`<div><div class="kl">Early Pay</div><div class="kv cy">${d0(r.ep)}</div></div><div><div class="kl">Consumption</div><div class="kv cg">${d0(r.co)}</div></div><div><div class="kl">Total YTD</div><div class="kv">${d0(r.total)}</div></div>`;
+  $('#dTable tbody').innerHTML=r.months.map(x=>x.has?`<tr><td class="cw">${MONTHS[x.mi-1]}</td><td>${f0(x.g)}</td><td>${d2(x.s)}</td><td><span class="badge ${x.tier.cls}">${pct(x.tier.rate)}</span></td><td class="cy">${d2(x.ep)}</td><td class="cg">${d2(x.co)}</td><td class="cw">${d2(x.ep+x.co)}</td></tr>`:`<tr><td class="cw">${MONTHS[x.mi-1]}</td><td colspan="6" class="cm" style="text-align:center">no activity</td></tr>`).join('');
+  $('#dTable tfoot').innerHTML=`<tr><td>Total</td><td>${f0(r.g)}</td><td>${d2(r.s)}</td><td></td><td class="cy">${d2(r.ep)}</td><td class="cg">${d2(r.co)}</td><td>${d2(r.total)}</td></tr>`;
+  $('#drawer').classList.add('on');
+}
+$('#dx').onclick=()=>$('#drawer').classList.remove('on');
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#drawer').classList.remove('on');});
+
+// CSV copy
+$('#copyBtn').onclick=async()=>{
+  const tr=tierRate(); const rows=sortRows(locRows());
+  let lines=['Location,Month,Gallons,Eligible Spend,Volume Tier,Consumption Rate,Early Pay Rebate,Consumption Rebate,Total Rebate'];
+  rows.forEach(r=>r.months.forEach(x=>{ if(!x.has) return; if(mode==='month'&&x.mi!==selMonth) return;
+    lines.push([r.l,MONTHS[x.mi-1]+' 2026',x.g.toFixed(1),x.s.toFixed(2),'"'+x.tier.name+'"',(x.tier.rate*100).toFixed(2)+'%',x.ep.toFixed(2),x.co.toFixed(2),(x.ep+x.co).toFixed(2)].join(','));}));
+  try{await navigator.clipboard.writeText(lines.join('\n'));toast(`Copied ${lines.length-1} rows — paste into Excel`);}catch(e){toast('Clipboard blocked by browser');}
+};
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',2600);}
+
+// tooltips
+function bindTips(sel){const tt=$('#tt');document.querySelectorAll(sel).forEach(el=>{el.onmousemove=e=>{tt.innerHTML=el.dataset.tip;tt.style.display='block';let x=e.clientX+16;if(x+260>innerWidth)x=e.clientX-270;tt.style.left=x+'px';tt.style.top=(e.clientY-10)+'px';};el.onmouseleave=()=>tt.style.display='none';});}
+
+// controls
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));try{history.replaceState(null,'','#'+b.dataset.v)}catch(e){}});
+function segBind(id,attr,fn){document.querySelectorAll(id+' button').forEach(b=>b.onclick=()=>{document.querySelectorAll(id+' button').forEach(x=>x.classList.toggle('on',x===b));fn(b.dataset[attr]);});}
+segBind('#basisSeg','b',v=>{basis=v;renderAll();});
+segBind('#metricSeg','k',v=>{metric=v;renderLocations();});
+segBind('#modeSeg','m',v=>{mode=v;$('#metricWrap').style.display=v==='matrix'?'':'none';$('#monthWrap').style.display=v==='month'?'':'none';$('#heatBtn').style.display=v==='matrix'?'':'none';sortKey='total';sortDir=-1;renderLocations();});
+$('#monthSel').innerHTML=MFULL.map((m,i)=>`<option value="${i+1}" ${i===8?'selected':''}>${m} 2026</option>`).join('');
+$('#monthSel').onchange=e=>{selMonth=+e.target.value;renderLocations();};
+$('#q').oninput=renderLocations;
+$('#heatBtn').onclick=()=>{heat=!heat;$('#heatBtn').textContent='Heatmap: '+(heat?'on':'off');renderLocations();};
+
+function renderAll(){renderSummary();renderLocations();}
+renderAll();
+if(location.hash==='#locations') document.querySelector('.tab[data-v=locations]').click();
+</script>
+</body>
+</html>
