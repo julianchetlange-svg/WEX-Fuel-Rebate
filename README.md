@@ -17,7 +17,9 @@ Tabs: **Monthly Rebate Summary** (early pay vs. consumption by month, tier ladde
 
 ```bash
 pip install pandas openpyxl
-python build/build_rebate.py path/to/Transactions.xlsx
+python build/build_rebate.py exports/Transactions_JanSep.xlsx exports/Transactions_Oct.xlsx
 ```
 
-This regenerates `index.html` from `build/template.html` and `build/logo.png`.
+Pass every export for the year; files are combined (identical rows dropped) and the months shown on the page follow the data. This regenerates `index.html` from `build/template.html` and `build/logo.png`.
+
+Raw exports contain driver names and card details — keep them in `exports/` (git-ignored), never commit them.
